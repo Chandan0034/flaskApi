@@ -34,5 +34,3 @@ def get_video_info():
         print(e)
         return jsonify({'error': 'An unexpected error occurred'}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
