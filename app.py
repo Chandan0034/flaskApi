@@ -12,10 +12,6 @@ def get_video_info():
     video_url = request.args.get('video_url')  # Using .get() to avoid KeyError if 'video_url' is missing
     if not video_url:
         return jsonify({'error': 'Missing video_url parameter'}), 400
-
-    if "xvideos.com" in video_url:
-        video_url=video_url.replace('www.','mobile-')
-    print("Video Link: ", video_url)
     
     ydl_opts = {'format':'best','--verbose': True}
     try:
