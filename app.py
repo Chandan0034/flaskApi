@@ -50,10 +50,11 @@ def get_video_info():
     # Options for yt-dlp to handle subtitles and provide verbose output
     ydl_opts = {
         'format': 'best',  # Change this if needed
-        'verbose': True,
+        '--verbose': True,
         'skip_download': True,  # Do not download the video
         'writesubtitles': True,  # Write subtitles if available
         'subtitleslangs': ['en', 'all'],
+        'noplaylist': True
     }
 
     try:
