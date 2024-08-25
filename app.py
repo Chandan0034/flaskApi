@@ -13,7 +13,14 @@ def get_video_info():
     if not video_url:
         return jsonify({'error': 'Missing video_url parameter'}), 400
     
-    ydl_opts = {'format':'best','--verbose': True}
+    ydl_opts = {
+    'format': 'best',
+    'verbose': True,
+    'headers': {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+        }
+    }
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
