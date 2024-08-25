@@ -17,9 +17,13 @@ def get_video_info():
     'format': 'best',
     'verbose': True,
     'headers': {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+        'Referer': 'https://www.youtube.com/',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive'
         }
     }
+
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
