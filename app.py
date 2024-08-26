@@ -14,14 +14,14 @@ def get_video_info():
         return jsonify({'error': 'Missing video_url parameter'}), 400
     
     ydl_opts = {
-    'format': 'best',
-    'verbose': True,
-    'headers': {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
-        'Referer': 'https://www.youtube.com/',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive'
-        }
+    # 'format': 'best',
+    # 'verbose': True,
+    # 'headers': {
+    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+    #     'Referer': 'https://www.youtube.com/',
+    #     'Accept-Encoding': 'gzip, deflate, br',
+    #     'Connection': 'keep-alive'
+    #     }
     }
 
 
