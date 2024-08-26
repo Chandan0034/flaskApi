@@ -13,15 +13,30 @@ def get_video_info():
     if not video_url:
         return jsonify({'error': 'Missing video_url parameter'}), 400
     
+    # ydl_opts = {
+    # # 'format': 'best',
+    # # 'verbose': True,
+    # # 'headers': {
+    # #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+    # #     'Referer': 'https://www.youtube.com/',
+    # #     'Accept-Encoding': 'gzip, deflate, br',
+    # #     'Connection': 'keep-alive'
+    # #     }
+    # }
     ydl_opts = {
-    # 'format': 'best',
-    # 'verbose': True,
-    # 'headers': {
-    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
-    #     'Referer': 'https://www.youtube.com/',
-    #     'Accept-Encoding': 'gzip, deflate, br',
-    #     'Connection': 'keep-alive'
-    #     }
+        'force_generic_extractor': True,
+        '--verbose':True,
+        'cookiefile': 'cookies.txt',  # Path to your cookies file
+        'format': 'best',
+        'nocheckcertificate': True,
+        'quiet': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            'Accept-Language': 'en-US,en;q=0.5'
+        },
+        'extractor_retries': 3,  # Retry 3 times in case of extractor issues
+        'sleep_interval': 2,  # Sleep for a few seconds between requests
+        'throttled_rate': '1M'  # Throttle download rate to avoid triggering anti-bot measures
     }
 
 
