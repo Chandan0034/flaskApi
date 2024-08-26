@@ -31,7 +31,7 @@ def get_video_info():
         'nocheckcertificate': True,
         'quiet': True,
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
             'Accept-Language': 'en-US,en;q=0.5'
         },
         'extractor_retries': 3,  # Retry 3 times in case of extractor issues
