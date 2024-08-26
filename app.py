@@ -180,15 +180,11 @@ def get_video_info():
     if video_url is None:
         return jsonify({"message": "Video URL is required"}), 400
     
-    # Credentials (For demo purposes only, not recommended for production)
-    youtube_username = "chandandpu@gmail.com"
-    youtube_password = "Chandan@2020"
-    
     try:
         ydl_opts = {
             'format': 'best',
-            'username': youtube_username,  # Add username for login
-            'password': youtube_password,  # Add password for login
+            'verbose':True,
+            'cookiefile': 'cookies.txt',
             'nocheckcertificate': True,  # Ignore SSL certificate errors
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
