@@ -162,6 +162,47 @@
 # #         return jsonify({'error': 'An unexpected error occurred'}), 500
 
 
+# from flask import Flask, jsonify, request
+# from flask_cors import CORS
+# import yt_dlp
+
+# app = Flask(__name__)
+
+# CORS(app)
+
+# @app.route("/", methods=['GET'])
+# def home():
+#     return jsonify({"message": "Welcome to the API"}), 200
+
+# @app.route("/get_video_info", methods=['GET'])
+# def get_video_info():
+#     video_url = request.args.get("video_url")
+#     if video_url is None:
+#         return jsonify({"message": "Video URL is required"}), 400
+    
+#     try:
+#         ydl_opts = {
+#             'format': 'best',
+#             'verbose':True,
+#             'cookiefile': 'cookies.txt',
+#             'nocheckcertificate': True,  # Ignore SSL certificate errors
+#         }
+#         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#             info = ydl.extract_info(video_url, download=False)
+#             return jsonify(info), 200
+
+#     except yt_dlp.utils.ExtractorError as e:
+#         error_message = str(e)
+#         print(error_message)
+#         return jsonify({'error': error_message}), 404
+#     except yt_dlp.utils.DownloadError as e:
+#         error_message = str(e)
+#         print(error_message)
+#         return jsonify({'error': error_message}), 404
+#     except Exception as e:
+#         print(e)
+#         return jsonify({'error': 'An unexpected error occurred'}), 500
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yt_dlp
@@ -181,12 +222,14 @@ def get_video_info():
         return jsonify({"message": "Video URL is required"}), 400
     
     try:
+        # Using cookies from a browser (e.g., Chrome, Firefox)
         ydl_opts = {
             'format': 'best',
-            'verbose':True,
-            'cookiefile': 'cookies.txt',
-            'nocheckcertificate': True,  # Ignore SSL certificate errors
+            'verbose': True,
+            'cookiesfrombrowser': ('chrome'),  # Replace 'chrome' with your browser choice
+            'nocheckcertificate': True,
         }
+        
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
             return jsonify(info), 200
