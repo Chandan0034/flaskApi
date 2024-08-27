@@ -274,24 +274,29 @@ cookie_file_path = os.path.join(os.getcwd(), 'cookies.txt')
 def refresh_cookies():
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)  # Set headless=True for server environments
+            browser = p.chromium.launch(headless=True)  # Headless mode for server environments
             context = browser.new_context()
             page = context.new_page()
 
-            # Open YouTube and perform the login process
+            # Open YouTube and perform any necessary login
             page.goto('https://www.youtube.com')
-            page.wait_for_timeout(10000)  # Adjust timeout as needed to perform login manually
+            page.wait_for_timeout(10000)  # Adjust timeout as needed
 
-            # Save cookies to a file
+            # Get cookies and save in Netscape format
             cookies = context.cookies()
+
             with open(cookie_file_path, 'w') as f:
-                json.dump(cookies, f)
+                f.write("# Netscape HTTP Cookie File\n")
+                f.write("# This is a generated file! Do not edit.\n")
+                for cookie in cookies:
+                    # Convert the Playwright cookie dictionary to Netscape format
+                    cookie_line = f"{cookie['domain']}\t{'TRUE' if cookie.get('httpOnly', False) else 'FALSE'}\t{cookie.get('path', '/')}\t{'TRUE' if cookie.get('secure', False) else 'FALSE'}\t{int(cookie.get('expires', 0))}\t{cookie['name']}\t{cookie['value']}\n"
+                    f.write(cookie_line)
 
             browser.close()
             print("Cookies refreshed successfully.")
     except Exception as e:
         print("Failed to refresh cookies:", str(e))
-        print(traceback.format_exc())
 
 # Function to periodically refresh cookies
 def start_cookie_refresh(interval=600):  # Interval set to 600 seconds (10 minutes)
@@ -309,6 +314,7 @@ def home():
 @app.route("/get_video_info", methods=['GET'])
 def get_video_info():
     video_url = request.args.get("video_url")
+    threading.Thread(target=start_cookie_refresh, daemon=True).start()
     if video_url is None:
         return jsonify({"message": "Video URL is required"}), 400
 
