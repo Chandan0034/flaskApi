@@ -344,10 +344,5 @@ def get_video_info():
         print("Unexpected error occurred:", error_message)
         return jsonify({'error': 'An unexpected error occurred', 'details': error_message}), 500
 
-if __name__ == "__main__":
-    # Start the cookie refresh in a background thread
-    threading.Thread(target=start_cookie_refresh, daemon=True).start()
-    # Run the Flask app
-    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
