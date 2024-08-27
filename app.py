@@ -162,46 +162,46 @@
 # #         return jsonify({'error': 'An unexpected error occurred'}), 500
 
 
-# from flask import Flask, jsonify, request
-# from flask_cors import CORS
-# import yt_dlp
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import yt_dlp
 
-# app = Flask(__name__)
+app = Flask(__name__)
 
-# CORS(app)
+CORS(app)
 
-# @app.route("/", methods=['GET'])
-# def home():
-#     return jsonify({"message": "Welcome to the API"}), 200
+@app.route("/", methods=['GET'])
+def home():
+    return jsonify({"message": "Welcome to the API"}), 200
 
-# @app.route("/get_video_info", methods=['GET'])
-# def get_video_info():
-#     video_url = request.args.get("video_url")
-#     if video_url is None:
-#         return jsonify({"message": "Video URL is required"}), 400
+@app.route("/get_video_info", methods=['GET'])
+def get_video_info():
+    video_url = request.args.get("video_url")
+    if video_url is None:
+        return jsonify({"message": "Video URL is required"}), 400
     
-#     try:
-#         ydl_opts = {
-#             'format': 'best',
-#             'verbose':True,
-#             'cookiefile': 'cookies.txt',
-#             'nocheckcertificate': True,  # Ignore SSL certificate errors
-#         }
-#         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-#             info = ydl.extract_info(video_url, download=False)
-#             return jsonify(info), 200
+    try:
+        ydl_opts = {
+            'format': 'best',
+            'verbose':True,
+            'cookiefile': 'cookies.txt',
+            'nocheckcertificate': True,  # Ignore SSL certificate errors
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+            return jsonify(info), 200
 
-#     except yt_dlp.utils.ExtractorError as e:
-#         error_message = str(e)
-#         print(error_message)
-#         return jsonify({'error': error_message}), 404
-#     except yt_dlp.utils.DownloadError as e:
-#         error_message = str(e)
-#         print(error_message)
-#         return jsonify({'error': error_message}), 404
-#     except Exception as e:
-#         print(e)
-#         return jsonify({'error': 'An unexpected error occurred'}), 500
+    except yt_dlp.utils.ExtractorError as e:
+        error_message = str(e)
+        print(error_message)
+        return jsonify({'error': error_message}), 404
+    except yt_dlp.utils.DownloadError as e:
+        error_message = str(e)
+        print(error_message)
+        return jsonify({'error': error_message}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 # from flask import Flask, jsonify, request
 # from flask_cors import CORS
@@ -253,37 +253,37 @@
 #         return jsonify({'error': 'An unexpected error occurred'}), 500
 
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import yt_dlp
-import logging
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# import yt_dlp
+# import logging
 
-app = Flask(__name__)
-CORS(app)
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# app = Flask(__name__)
+# CORS(app)
+# # Configure logging
+# logging.basicConfig(level=logging.INFO)
 
-@app.route('/extract', methods=['GET'])
-def extract_video_info():
-    video_url = request.args.get('url')
+# @app.route('/extract', methods=['GET'])
+# def extract_video_info():
+#     video_url = request.args.get('url')
 
-    if not video_url:
-        return jsonify({"error": "No URL provided"}), 400
+#     if not video_url:
+#         return jsonify({"error": "No URL provided"}), 400
 
-    try:
-        ydl_opts = {
-            'noplaylist': True,  # Don't download playlists
-            'quiet': True,  # Suppress output
-        }
+#     try:
+#         ydl_opts = {
+#             'noplaylist': True,  # Don't download playlists
+#             'quiet': True,  # Suppress output
+#         }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(video_url, download=False)
+#         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#             info_dict = ydl.extract_info(video_url, download=False)
 
-        return jsonify(info_dict)
+#         return jsonify(info_dict)
 
-    except yt_dlp.DownloadError as e:
-        logging.error(f"Download error: {e}")
-        return jsonify({"error": str(e)}), 500
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+#     except yt_dlp.DownloadError as e:
+#         logging.error(f"Download error: {e}")
+#         return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         logging.error(f"An unexpected error occurred: {e}")
+#         return jsonify({"error": "An unexpected error occurred"}), 500
