@@ -253,7 +253,6 @@
 #         return jsonify({'error': 'An unexpected error occurred'}), 500
 
 
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yt_dlp
@@ -272,10 +271,20 @@ cookie_file_path = os.path.join(os.getcwd(), 'cookies.txt')
 def save_cookies_as_netscape(cookies, file_path):
     with open(file_path, 'w') as f:
         f.write("# Netscape HTTP Cookie File\n")
-        f.write("# This is a generated file! Do not edit.\n")
+        f.write("# http://curl.haxx.se/rfc/cookie_spec.html\n")
+        f.write("# This is a generated file!  Do not edit.\n")
         for cookie in cookies:
-            cookie_line = f"{cookie['domain']}\t{'TRUE' if cookie.get('httpOnly', False) else 'FALSE'}\t{cookie.get('path', '/')}\t{'TRUE' if cookie.get('secure', False) else 'FALSE'}\t{int(cookie.get('expires', 0))}\t{cookie['name']}\t{cookie['value']}\n"
-            f.write(cookie_line)
+            domain = cookie.get('domain', '')
+            flag = 'TRUE' if cookie.get('httpOnly', False) else 'FALSE'
+            path = cookie.get('path', '/')
+            secure = 'TRUE' if cookie.get('secure', False) else 'FALSE'
+            expires = int(cookie.get('expires', 0))
+            name = cookie.get('name', '')
+            value = cookie.get('value', '')
+
+            # Ensure cookie fields are present and formatted properly
+            if all([domain, name]):
+                f.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expires}\t{name}\t{value}\n")
 
 def refresh_cookies():
     try:
@@ -346,4 +355,5 @@ def get_video_info():
 
 # Start the cookie refresh thread
 threading.Thread(target=start_cookie_refresh, daemon=True).start()
+
 
