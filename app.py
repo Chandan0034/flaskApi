@@ -281,7 +281,13 @@ def save_cookies_as_netscape(cookies, file_path):
             expires = int(cookie.get('expires', 0))
             name = cookie.get('name', '')
             value = cookie.get('value', '')
-
+            print(domain)
+            print(flag)
+            print(path)
+            print(secure)
+            print(expires)
+            print(name)
+            print(value)
             # Ensure cookie fields are present and formatted properly
             if all([domain, name]):
                 f.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expires}\t{name}\t{value}\n")
