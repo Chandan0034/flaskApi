@@ -259,7 +259,6 @@ from flask_cors import CORS
 import yt_dlp
 import os
 import json
-import traceback
 import threading
 import time
 from playwright.sync_api import sync_playwright
@@ -270,42 +269,33 @@ CORS(app)
 # Path to the cookies file
 cookie_file_path = os.path.join(os.getcwd(), 'cookies.txt')
 
-# Function to refresh cookies using Playwright
+def save_cookies_as_netscape(cookies, file_path):
+    with open(file_path, 'w') as f:
+        f.write("# Netscape HTTP Cookie File\n")
+        f.write("# This is a generated file! Do not edit.\n")
+        for cookie in cookies:
+            cookie_line = f"{cookie['domain']}\t{'TRUE' if cookie.get('httpOnly', False) else 'FALSE'}\t{cookie.get('path', '/')}\t{'TRUE' if cookie.get('secure', False) else 'FALSE'}\t{int(cookie.get('expires', 0))}\t{cookie['name']}\t{cookie['value']}\n"
+            f.write(cookie_line)
+
 def refresh_cookies():
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)  # Headless mode for server environments
+            browser = p.chromium.launch(headless=True)
             context = browser.new_context()
             page = context.new_page()
-
-            # Open YouTube and perform any necessary login
             page.goto('https://www.youtube.com')
-            page.wait_for_timeout(10000)  # Adjust timeout as needed
-
-            # Get cookies and save in Netscape format
+            page.wait_for_timeout(10000)
             cookies = context.cookies()
-
-            with open(cookie_file_path, 'w') as f:
-                f.write("# Netscape HTTP Cookie File\n")
-                f.write("# This is a generated file! Do not edit.\n")
-                for cookie in cookies:
-                    # Convert the Playwright cookie dictionary to Netscape format
-                    cookie_line = f"{cookie['domain']}\t{'TRUE' if cookie.get('httpOnly', False) else 'FALSE'}\t{cookie.get('path', '/')}\t{'TRUE' if cookie.get('secure', False) else 'FALSE'}\t{int(cookie.get('expires', 0))}\t{cookie['name']}\t{cookie['value']}\n"
-                    f.write(cookie_line)
-
+            save_cookies_as_netscape(cookies, cookie_file_path)
             browser.close()
-            print("Cookies refreshed successfully.")
+            print("Cookies refreshed and saved successfully.")
     except Exception as e:
         print("Failed to refresh cookies:", str(e))
 
-# Function to periodically refresh cookies
-def start_cookie_refresh(interval=600):  # Interval set to 600 seconds (10 minutes)
+def start_cookie_refresh(interval=600):
     while True:
         refresh_cookies()
         time.sleep(interval)
-
-# Start the cookie refresh thread outside of the __main__ block
-threading.Thread(target=start_cookie_refresh, daemon=True).start()
 
 @app.route("/", methods=['GET'])
 def home():
@@ -314,20 +304,18 @@ def home():
 @app.route("/get_video_info", methods=['GET'])
 def get_video_info():
     video_url = request.args.get("video_url")
-    threading.Thread(target=start_cookie_refresh, daemon=True).start()
     if video_url is None:
         return jsonify({"message": "Video URL is required"}), 400
 
     try:
-        # Check if the cookie file exists and is valid
         if not os.path.exists(cookie_file_path):
-            refresh_cookies()  # Refresh cookies if file is not found
+            refresh_cookies()
 
         ydl_opts = {
             'format': 'best',
             'verbose': True,
-            'cookiefile': cookie_file_path,  # Use dynamic cookie file
-            'nocheckcertificate': True,      # Ignore SSL certificate errors
+            'cookiefile': cookie_file_path,
+            'nocheckcertificate': True,
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -343,9 +331,8 @@ def get_video_info():
     except yt_dlp.utils.ExtractorError as e:
         error_message = str(e)
         print(error_message)
-        # If a cookie-related error is detected, attempt to refresh cookies
         if "cookies" in error_message.lower():
-            refresh_cookies()  # Refresh cookies dynamically upon error
+            refresh_cookies()
             return jsonify({'error': 'Cookies expired or invalid, refreshing...'}), 403
         return jsonify({'error': error_message}), 404
     except yt_dlp.utils.DownloadError as e:
@@ -355,5 +342,8 @@ def get_video_info():
     except Exception as e:
         error_message = str(e)
         print("Unexpected error occurred:", error_message)
-        print(traceback.format_exc())
         return jsonify({'error': 'An unexpected error occurred', 'details': error_message}), 500
+
+# Start the cookie refresh thread
+threading.Thread(target=start_cookie_refresh, daemon=True).start()
+
