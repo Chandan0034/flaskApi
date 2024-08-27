@@ -203,13 +203,104 @@
 #         print(e)
 #         return jsonify({'error': 'An unexpected error occurred'}), 500
 
+# from flask import Flask, jsonify, request
+# from flask_cors import CORS
+# import yt_dlp
+
+# app = Flask(__name__)
+
+# CORS(app)
+
+# @app.route("/", methods=['GET'])
+# def home():
+#     return jsonify({"message": "Welcome to the API"}), 200
+
+# @app.route("/get_video_info", methods=['GET'])
+# def get_video_info():
+#     video_url = request.args.get("video_url")
+#     if video_url is None:
+#         return jsonify({"message": "Video URL is required"}), 400
+    
+#     try:
+#         # Corrected usage of cookiesfrombrowser
+#         ydl_opts = {
+#             'format': 'best',
+#             'verbose': True,
+#             'cookiesfrombrowser': ('chrome',),  # Correct format
+#             'nocheckcertificate': True,
+#             'http_headers': {
+#                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+#                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#                 'Accept-Language': 'en-us,en;q=0.5',
+#                 'Sec-Fetch-Mode': 'navigate',
+#             }
+#         }
+        
+#         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#             info = ydl.extract_info(video_url, download=False)
+#             return jsonify(info), 200
+
+#     except yt_dlp.utils.ExtractorError as e:
+#         error_message = str(e)
+#         print(error_message)
+#         return jsonify({'error': error_message}), 404
+#     except yt_dlp.utils.DownloadError as e:
+#         error_message = str(e)
+#         print(error_message)
+#         return jsonify({'error': error_message}), 404
+#     except Exception as e:
+#         print(e)
+#         return jsonify({'error': 'An unexpected error occurred'}), 500
+
+
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yt_dlp
+import os
+import json
+import traceback
+import threading
+import time
+from playwright.sync_api import sync_playwright
 
 app = Flask(__name__)
-
 CORS(app)
+
+# Path to the cookies file
+cookie_file_path = os.path.join(os.getcwd(), 'cookies.txt')
+
+# Function to refresh cookies using Playwright
+def refresh_cookies():
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)  # Set headless=True for server environments
+            context = browser.new_context()
+            page = context.new_page()
+
+            # Open YouTube and perform the login process
+            page.goto('https://www.youtube.com')
+            page.wait_for_timeout(10000)  # Adjust timeout as needed to perform login manually
+
+            # Save cookies to a file
+            cookies = context.cookies()
+            with open(cookie_file_path, 'w') as f:
+                json.dump(cookies, f)
+
+            browser.close()
+            print("Cookies refreshed successfully.")
+    except Exception as e:
+        print("Failed to refresh cookies:", str(e))
+        print(traceback.format_exc())
+
+# Function to periodically refresh cookies
+def start_cookie_refresh(interval=600):  # Interval set to 600 seconds (10 minutes)
+    while True:
+        refresh_cookies()
+        time.sleep(interval)
+
+# Start the cookie refresh thread outside of the __main__ block
+threading.Thread(target=start_cookie_refresh, daemon=True).start()
 
 @app.route("/", methods=['GET'])
 def home():
@@ -220,14 +311,17 @@ def get_video_info():
     video_url = request.args.get("video_url")
     if video_url is None:
         return jsonify({"message": "Video URL is required"}), 400
-    
+
     try:
-        # Corrected usage of cookiesfrombrowser
+        # Check if the cookie file exists and is valid
+        if not os.path.exists(cookie_file_path):
+            refresh_cookies()  # Refresh cookies if file is not found
+
         ydl_opts = {
             'format': 'best',
             'verbose': True,
-            'cookiesfrombrowser': ('chrome',),  # Correct format
-            'nocheckcertificate': True,
+            'cookiefile': cookie_file_path,  # Use dynamic cookie file
+            'nocheckcertificate': True,      # Ignore SSL certificate errors
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -235,7 +329,7 @@ def get_video_info():
                 'Sec-Fetch-Mode': 'navigate',
             }
         }
-        
+
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
             return jsonify(info), 200
@@ -243,11 +337,17 @@ def get_video_info():
     except yt_dlp.utils.ExtractorError as e:
         error_message = str(e)
         print(error_message)
+        # If a cookie-related error is detected, attempt to refresh cookies
+        if "cookies" in error_message.lower():
+            refresh_cookies()  # Refresh cookies dynamically upon error
+            return jsonify({'error': 'Cookies expired or invalid, refreshing...'}), 403
         return jsonify({'error': error_message}), 404
     except yt_dlp.utils.DownloadError as e:
         error_message = str(e)
         print(error_message)
         return jsonify({'error': error_message}), 404
     except Exception as e:
-        print(e)
-        return jsonify({'error': 'An unexpected error occurred'}), 500
+        error_message = str(e)
+        print("Unexpected error occurred:", error_message)
+        print(traceback.format_exc())
+        return jsonify({'error': 'An unexpected error occurred', 'details': error_message}), 500
