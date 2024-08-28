@@ -165,10 +165,22 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yt_dlp
+import random
+import time
 
 app = Flask(__name__)
 
 CORS(app)
+
+# List of User-Agent strings to rotate
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0',
+    # Add more User-Agents as needed
+]
+
+# Retrieve proxy settings from environment variables
 
 @app.route("/", methods=['GET'])
 def home():
@@ -179,14 +191,24 @@ def get_video_info():
     video_url = request.args.get("video_url")
     if video_url is None:
         return jsonify({"message": "Video URL is required"}), 400
+
+    # Rotate User-Agent
+    user_agent = random.choice(USER_AGENTS)
     
-    try:
-        ydl_opts = {
-            'format': 'best',
-            'verbose':True,
-            'cookiefile': 'cookies.txt',
-            'nocheckcertificate': True,  # Ignore SSL certificate errors
+    # Configure yt_dlp options
+    ydl_opts = {
+        'format': 'best',
+        'verbose': True,
+        'nocheckcertificate': True,
+        'headers': {
+            'User-Agent': user_agent
         }
+    }
+
+    try:
+        # Simulate a delay to mimic human behavior
+        time.sleep(random.uniform(1, 3))
+
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
             return jsonify(info), 200
