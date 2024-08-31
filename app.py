@@ -20,17 +20,11 @@ def get_video_info():
     ydl_opts = {
         'format': 'best',  # Change this if needed
         '--verbose': True,
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
-            
-            # Check if there are available formats
-            if not info.get('formats'):
-                return jsonify({'error': 'No formats available for this video'}), 404
-            
             # Return all available information, including formats and subtitles
             return jsonify(info), 200
     except yt_dlp.utils.ExtractorError as e:
