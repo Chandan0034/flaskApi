@@ -8,7 +8,7 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def get_method():
-    return "Welcome To My Python Api"
+    return "Welcome To My Api Dashboard"
 
 @app.route('/get_video_info', methods=['GET'])
 def get_video_info():
