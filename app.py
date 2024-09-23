@@ -19,7 +19,7 @@ def get_video_info():
     # Options for yt-dlp to handle subtitles and provide verbose output
     ydl_opts = {
         'format': 'best',  # Change this if needed
-        '--verbose': True,
+        'verbose': True,
     }
 
     try:
